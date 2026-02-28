@@ -23,7 +23,8 @@ library(tidyverse)
 dem_candidates <- read_csv("data/dem_candidates.csv")
 rep_candidates <- read_csv("data/rep_candidates.csv")
 
-dem_candidates
+glimpse(dem_candidates)
+glimpse(rep_candidates)
 ```
 
 
