@@ -12,3 +12,22 @@ output:
 ## Project thoughts
 
 I am interested in exploring data related to voter turnout of different states in the 2024 presidential election. Possibly looking closely at swing states to examine which candidate was more successful in getting voters to the polls.
+
+
+## Download Data
+
+```{r setup}
+library(tidyverse)
+```
+
+```{r}
+dem_candidates <- read_csv("data/dem_candidates.csv")
+rep_candidates <- read_csv("data/rep_candidates.csv")
+
+merged_data <- merge(dem_candidates, rep_candidates, all = TRUE)
+
+glimpse(merged_data)
+```
+
+
+
