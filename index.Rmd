@@ -11,10 +11,9 @@ output:
 
 ## Project thoughts
 
-I am interested in exploring data related to voter turnout of different states in the 2024 presidential election. Possibly looking closely at swing states to examine which candidate was more successful in getting voters to the polls.
+I am interested in exploring data related to aspects like gender and race and how they play into candidate success.
 
-
-## Download Data
+## Downloading Data
 
 ```{r setup}
 library(tidyverse)
@@ -24,10 +23,15 @@ library(tidyverse)
 dem_candidates <- read_csv("data/dem_candidates.csv")
 rep_candidates <- read_csv("data/rep_candidates.csv")
 
-merged_data <- merge(dem_candidates, rep_candidates, all = TRUE)
-
-glimpse(merged_data)
+dem_candidates
 ```
+
+
+## Research Question
+
+**How does gender impact candidate success in primary elections?**
+
+If a female candidate runs in a democratic primary, then they will have more electoral success than republican female candidates. This assumptions stems from the theory that democratic female candidates will have greater success because democratic voters are historically more supportive of diverse candidates.The explanatory variables are party, determined by which primary the candidate is running in, and gender, determined by campaign materials and interviews with candidates. The outcome variable is primary election success. This is measured in the data set by both Primary Outcome (Won, Lost or Made runoff), and Primary % (percentage of votes in primary election). My hypothesis will be supported if data shows more results of "Won" for female candidates in democratic than republican primaries.
 
 
 
