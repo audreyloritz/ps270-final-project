@@ -50,6 +50,19 @@ elections <- elections |>
 
 glimpse(elections)
 ```
+## Checking Data
+```{r}
+ggplot(elections,
+      aes(x = Gender, y = `Primary %`)) +
+  geom_point()
+```
+
+```{r}
+elections |> group_by(Gender) |>
+  ggplot(aes(x = Candidate, y = `Primary %`, color = Gender)) +
+  geom_point(alpha = 0.5)
+```
+
 
 ## Visulization
 
@@ -63,3 +76,5 @@ party_gender_success <- elections |> group_by(Party, Gender) |>
 
 party_gender_success
 ```
+
+This graph demonstrates primary success based on gender within the two primary political parties. The average Democratic vote percentage for female candidates is just over 50%, whereas female Republicans only got an average of under 30% in their elections. Female candidates in Democratic primaries saw greater success than those in Republican primaries.
