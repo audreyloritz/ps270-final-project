@@ -69,7 +69,7 @@ This graph demonstrates primary success based on gender within the two main poli
 
 ## Regression
 
-```{r seperate data}
+```{r}
 dem_elections <- elections |>
   filter(Party == "Democrat")
 
@@ -78,7 +78,7 @@ rep_elections <- elections |>
 ```
 
 
-```{r}
+```{r regression}
 dem_fit <- lm(`Primary %` ~ Gender, data = dem_elections)
 
 rep_fit <- lm(`Primary %` ~ Gender, data = rep_elections)
@@ -98,7 +98,7 @@ combined_table <- bind_rows(dem_table, rep_table)
   
 combined_table <- combined_table |>
   mutate(term = recode(term,
-    "(Intercept)" = "Baseline (Women)",
+    "(Intercept)" = "Female Candidates",
     "GenderMale" = "Male difference")) |>
   select(model, term, estimate) |>
   pivot_wider(names_from = model, values_from = estimate)
@@ -106,30 +106,49 @@ combined_table <- combined_table |>
 knitr::kable(combined_table, digits = 2,
              col.names = c("Term", "Democrat", "Republican"))
 ```
+
+```{r dem p_value}
+dem_p_value <- dem_table |>
+  select(term, p.value) |>
+  pivot_wider(names_from = term, values_from = p.value)
+
+knitr::kable(dem_p_value, digits = 2,
+             col.names = c("Female Candidates", "Male Difference"))
+```
+
+```{r rep p_value}
+rep_p_value <- rep_table |>
+  select(term, p.value) |>
+  pivot_wider(names_from = term, values_from = p.value)
+
+knitr::kable(rep_p_value, digits = 2,
+             col.names = c("Female Candidates", "Male Difference"))
+```
+
+
 The table displays the relationship between gender and primary election results for democrats and republicans. The average female democrat got 52.32% of the votes in their primary election, and on average male candidates got 12.62 percentage points less votes. On the other hand, republican female candidates got on average 28.42% of the votes, and the average male candidates got 2.97 percentage points of votes in their primary elections. This supports my hypothesis as it demonstrates because democrat women are more successful in their primaries than republican women compared to the men in their respective parties. 
 
-```{r}
-fit <- lm(`Primary %` ~ Gender * Party, data = elections) |>
-  tidy()
 
-intercept <- fit |> filter(term == "(Intercept)")
-gender_rep <- fit |> filter(term == "GenderMale")
-party_dem <- fit |> filter(grepl("^party", term) & !grepl(":", term))
-interaction <- fit |> filter(grepl("GenderMale:PartyRepublican", term))
+## Interaction Coefficient Regression
+```{r interaction regression}
+fit <- lm(`Primary %` ~ Gender * Party, data = elections)
 
-results <- tibble(
-  Term = c("Baseline (Women)", "Male difference"),
-  Republican_Estimate = c(intercept$estimate,
-                          gender_rep$estimate),
-  Republican_p = c(intercept$p.value,
-                   gender_rep$p.value),
-  Democrat_Estimate = c(intercept$estimate + party_dem$estimate,
-                        gender_rep$estimate + interaction$estimate),
-    Democrat_p = c(party_dem$p.value,
-                 interaction$p.value)
-) 
+fit_table <- tidy(fit) |>
+  select(term, estimate) |>
+  pivot_wider(names_from = term, values_from = estimate)
 
-knitr::kable(results, digits = 3,
-             col.names = c("Term", "Republican Estimate", "Republican P-value", 
-                           "Democrat Estimate", "Democrat P-value"))
+knitr::kable(fit_table, digits = 2,
+             col.names = c("Intercept(Female Democrats)", "Male Democrats",
+                           "Female Republicans", "Male Republicans"))
 ```
+
+```{r interaction p_values}
+p_values <- tidy(fit) |>
+  select(term, p.value) |>
+  pivot_wider(names_from = term, values_from = p.value)
+
+knitr::kable(p_values, digits = 2,
+             col.names = c("Intercept(Female Democrats)", "Male Democrats",
+                           "Female Republicans", "Male Republicans"))
+```
+
