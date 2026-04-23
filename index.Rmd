@@ -7,29 +7,25 @@ output:
     self_contained: false
 ---
 
-
-
 ## Project thoughts
 
 I am interested in exploring data related to aspects like gender and race and how they play into candidate success.
 
 ## Downloading Data
 
-```{r setup}
+```{r setup, include=FALSE}
 library(tidyverse)
 library(readr)
 library(broom)
 library(dplyr)
 library(tidyr)
 library(knitr)
+library(infer)
 ```
 
 ```{r}
 dem_candidates <- read_csv("data/dem_candidates.csv")
 rep_candidates <- read_csv("data/rep_candidates.csv")
-
-glimpse(dem_candidates)
-glimpse(rep_candidates)
 ```
 
 
@@ -52,8 +48,6 @@ elections <- elections |>
 elections <- elections |>
   mutate(`Primary %` = parse_number(`Primary %`)) |>
   filter(Gender != "Nonbinary")
-
-glimpse(elections)
 ```
 
 ## Visulization
@@ -75,7 +69,7 @@ This graph demonstrates primary success based on gender within the two main poli
 
 ## Regression
 
-```{r}
+```{r seperate data}
 dem_elections <- elections |>
   filter(Party == "Democrat")
 
@@ -88,9 +82,7 @@ rep_elections <- elections |>
 dem_fit <- lm(`Primary %` ~ Gender, data = dem_elections)
 
 rep_fit <- lm(`Primary %` ~ Gender, data = rep_elections)
-```
 
-```{r}
 dem_table <- tidy(dem_fit) |> mutate(model = "Dem")
 rep_table <- tidy(rep_fit) |> mutate(model = "Rep")
 
@@ -116,3 +108,35 @@ knitr::kable(combined_table, digits = 2,
 ```
 The table displays the relationship between gender and primary election results for democrats and republicans. The average female democrat got 52.32% of the votes in their primary election, and on average male candidates got 12.62 percentage points less votes. On the other hand, republican female candidates got on average 28.42% of the votes, and the average male candidates got 2.97 percentage points of votes in their primary elections. This supports my hypothesis as it demonstrates because democrat women are more successful in their primaries than republican women compared to the men in their respective parties. 
 
+```{r}
+fit <- lm(`Primary %` ~ Gender * Party, data = elections) |>
+  tidy()
+```
+
+
+```{r}
+fit <- lm(`Primary %` ~ Gender * Party, data = elections) |>
+  tidy()
+
+# Extract coefficients safely
+intercept <- fit |> filter(term == "(Intercept)")
+gender_rep <- fit |> filter(term == "GenderMale")
+party_dem <- fit |> filter(grepl("^party", term) & !grepl(":", term))
+interaction <- fit |> filter(grepl("GenderMale:PartyDemocrat", term))
+
+results <- tibble(
+  Term = c("Baseline (Women)", "Male difference"),
+  Republican_Estimate = c(intercept$estimate,
+                          gender_rep$estimate),
+  Republican_p = c(intercept$p.value,
+                   gender_rep$p.value),
+  Democrat_Estimate = c(intercept$estimate + party_dem$estimate,
+                        gender_rep$estimate + interaction$estimate),
+    Democrat_p = c(party_dem$p.value,
+                 interaction$p.value)
+) 
+
+knitr::kable(results, digits = 3,
+             col.names = c("Term", "Republican Estimate", "Republican P-value", 
+                           "Democrat Estimate", "Democrat P-value"))
+```
