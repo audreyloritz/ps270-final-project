@@ -109,15 +109,13 @@ knitr::kable(combined_table, digits = 2,
 The table displays the relationship between gender and primary election results for democrats and republicans. The average female democrat got 52.32% of the votes in their primary election, and on average male candidates got 12.62 percentage points less votes. On the other hand, republican female candidates got on average 28.42% of the votes, and the average male candidates got 2.97 percentage points of votes in their primary elections. This supports my hypothesis as it demonstrates because democrat women are more successful in their primaries than republican women compared to the men in their respective parties. 
 
 ```{r}
-fit <- lm(`Primary %` ~ Gender * Party, data = elections)
+fit <- lm(`Primary %` ~ Gender * Party, data = elections) |>
+  tidy()
 
-coefs <- tidy(fit)
-
-intercept <- coefs |> filter(term == "(Intercept)")
-gender_rep <- coefs |> filter(term == "GenderMale")
-party_dem <- coefs |> 
-  filter(grepl("Party", term) & !grepl(":", term))
-interaction <- coefs |> filter(grepl("Gender.*:party|party.*:Gender", term))
+intercept <- fit |> filter(term == "(Intercept)")
+gender_rep <- fit |> filter(term == "GenderMale")
+party_dem <- fit |> filter(grepl("^party", term) & !grepl(":", term))
+interaction <- fit |> filter(grepl("GenderMale:PartyRepublican", term))
 
 results <- tibble(
   Term = c("Baseline (Women)", "Male difference"),
